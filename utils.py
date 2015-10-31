@@ -170,7 +170,7 @@ def get_srf(orbit, save=False):
     return aux
 
 
-def inline_rsr(orbit, winsize=1000., sampling=250., **kwargs):
+def inline_rsr(orbit, winsize=1000., sampling=250., save=False, **kwargs):
     """launch sliding RSR along a track
 
     Arguments
