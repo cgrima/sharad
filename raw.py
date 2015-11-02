@@ -12,7 +12,6 @@ import glob
 from params import *
 
 
-
 def read_rpb(orbit):
     """Output data from a RPB file in convenient form
 
@@ -21,7 +20,7 @@ def read_rpb(orbit):
     orbit : string
         orbit number
     """
-    fil = rpb_path+'decode_'+orbit.lstrip('0')+'000_1.raw'
+    fil = glob.glob(rpb_path+'decode_'+orbit.lstrip('0')+'000_*.raw')[0]
     file_size = os.stat(fil).st_size
     rows = 3600
     columns = file_size*8/32/rows
