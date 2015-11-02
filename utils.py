@@ -170,7 +170,7 @@ def get_srf(orbit, save=False):
     return aux
 
 
-def inline_rsr(orbit, winsize=1000., sampling=250., save=False, **kwargs):
+def inline_rsr(orbit, fit_model='hk', inv='spm' ,winsize=1000., sampling=250., save=False, **kwargs):
     """launch sliding RSR along a track
 
     Arguments
@@ -186,7 +186,7 @@ def inline_rsr(orbit, winsize=1000., sampling=250., save=False, **kwargs):
 
     srf = get_srf(orbit, save=True)
 
-    b = rsr.utils.inline_estim(srf.amp, frq=frq, winsize=winsize,
+    b = rsr.utils.inline_estim(srf.amp, fit_model=fit_model, inv=inv ,frq=frq, winsize=winsize,
         sampling=sampling, verbose=True)
     xo = np.round(np.array(b.xo)) # positions of the computed statistics
     b['lat'] = np.array(srf.ix[xo, 'lat'])
@@ -197,7 +197,7 @@ def inline_rsr(orbit, winsize=1000., sampling=250., save=False, **kwargs):
 
     if save is True:
         save_fil = string.replace(os.getcwd(), 'code', 'targ') + '/rsr/' + \
-                   orbit.zfill(7) + '.' + stat + '.' + inv
+                   orbit.zfill(7) + '.' + fit_model + '.' + inv
         title = orbit.zfill(7)
         b.to_csv(save_fil + '.txt', sep='\t', index=False, float_format='%.7f')
         rsr.utils.plot_inline(b, frq=frq, title=title)
