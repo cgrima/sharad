@@ -4,4 +4,4 @@ This is a Python package providing basic utilies to read/process the Shallow Rad
 
 ## Usage
 -----
-Copy params.py in the same folder as your sharad package and fill it with your own parameters.
+`cp _params.py ../params.py` and fill it with your own parameters.

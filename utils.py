@@ -11,17 +11,17 @@ import matplotlib.pyplot as plt
 import scipy.constants as ct
 from planetbody import mars, ellipsoid
 import rsr.utils
+import rsr.fit
 import os
 import string
 from params import *
-
 
 
 def calibration(val, wl=ct.c/frq, rng = False, abs_calib = abs_calib):
     """Signal calibrated from instrumental and geophysic gains (power in dB)
     If rng is given, will correct for the 2-way specular geomtric losses
     Also, change bad values to nan
-    
+
     Arguments
     --------
     val : float
@@ -85,7 +85,7 @@ def get_aux(orbit):
     Arguments
     ---------
     orbit : string
-        orbit number   
+        orbit number
     """
     aux = raw.read_aux(orbit)
     rpb = raw.read_rpb(orbit)
@@ -177,7 +177,7 @@ def inline_rsr(orbit, fit_model='hk', inv='spm' ,winsize=1000., sampling=250., s
     ---------
     orbit : string
         orbit number
-    
+
     Keywords
     --------
     save : bool
@@ -204,3 +204,44 @@ def inline_rsr(orbit, fit_model='hk', inv='spm' ,winsize=1000., sampling=250., s
         plt.savefig(save_fil + '.png', bbox_inches='tight')
     return b
 
+
+def rsr_orbit(orbit, frames, title=True, color='k'):
+    """return RSR plot and statistics for a frame along an orbit
+    """
+    srf = pd.read_table(srf_path+orbit.zfill(7)+'.srf.txt')
+    sample = srf.amp[frames[0]:frames[1]]
+    x = frames[0]+(frames[1]-frames[0])/2.
+
+    out = rsr.fit.hk(sample, param0=fit.hk_param0(sample))
+
+    print('Orbit '+orbit.zfill(7)+' [%i:%i]\nlat/lon: %.3f/%.3f'
+          % (frames[0], frames[1], srf.lat.values[x],
+          srf.lon.values[x]))
+    print('')
+    out.report(frq=20e6)
+    out.plot(bins=50, color=color)
+    if title is not False:
+        plt.title('Orbit '+orbit.zfill(7)+' [%i:%i]\nlat/lon: %.3f/%.3f'
+                  % (frames[0], frames[1], srf.lat.values[x], srf.lon.values[x]))
+
+
+def do_rsr(orbit, frames, title=True, color='k'):
+    """return RSR plot and statistics for a frame along an orbit
+    """
+    srf = pd.read_table(srf_path+orbit.zfill(7)+'.srf.txt')
+    sample = srf.amp[frames[0]:frames[1]]
+    x = frames[0]+(frames[1]-frames[0])/2.
+
+    out = rsr.fit.hk(sample, param0=rsr.fit.hk_param0(sample))
+
+    print('Orbit '+orbit.zfill(7)+' [%i:%i]\nlat/lon: %.3f/%.3f'
+          % (frames[0], frames[1], srf.lat.values[x],
+          srf.lon.values[x]))
+    print('')
+    out.report(frq=20e6)
+    out.plot(bins=50, color=color)
+    if title is not False:
+        plt.title('Orbit '+orbit.zfill(7)+' [%i:%i]\nlat/lon: %.3f/%.3f'
+                  % (frames[0], frames[1], srf.lat.values[x], srf.lon.values[x]))
+
+    return out
