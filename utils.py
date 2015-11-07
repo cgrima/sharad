@@ -14,6 +14,7 @@ import rsr.utils
 import rsr.fit
 import os
 import string
+import glob
 from params import *
 
 
@@ -232,16 +233,33 @@ def do_rsr(orbit, frames, title=True, color='k'):
     sample = srf.amp[frames[0]:frames[1]]
     x = frames[0]+(frames[1]-frames[0])/2.
 
-    out = rsr.fit.hk(sample, param0=rsr.fit.hk_param0(sample))
+    out = rsr.fit.lmfit(sample)
 
     print('Orbit '+orbit.zfill(7)+' [%i:%i]\nlat/lon: %.3f/%.3f'
           % (frames[0], frames[1], srf.lat.values[x],
           srf.lon.values[x]))
     print('')
     out.report(frq=20e6)
-    out.plot(bins=50, color=color)
+    out.plot(color=color)
     if title is not False:
         plt.title('Orbit '+orbit.zfill(7)+' [%i:%i]\nlat/lon: %.3f/%.3f'
                   % (frames[0], frames[1], srf.lat.values[x], srf.lon.values[x]))
 
+    return out
+
+
+def group_rsr(suffix, save=True):
+    fils = glob.glob(rsr_path + '[!all]*' + suffix)
+    fils.sort()
+
+    for fil in fils:
+        a = pd.read_table(fil)
+        orbit = np.empty(a.shape[0])
+        orbit.fill(fil.split('/')[-1].split('.')[0])
+        a['orbit'] = orbit
+        out = a if 'out' not in locals() else pd.concat([out, a])
+
+    if save is True:
+        filename = rsr_path + '/' + 'all' + suffix.replace('*','')
+        out.to_csv(filename, sep='\t', index=False, float_format='%.7f')
     return out
